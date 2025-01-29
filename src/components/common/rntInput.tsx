@@ -87,14 +87,14 @@ const RntInput = forwardRef<HTMLInputElement, RntInputProps>(
         <RntValidationError className={validationClassName} validationError={validationError} />
         {validationSuccessMessage && (
           <DotStatus
-            containerClassName="text-sm text-rnt-temp-main-text whitespace-nowrap mt-2 pl-4"
+            containerClassName="text-sm text-rnt-temp-main-text mt-2 pl-4 break-words xl:whitespace-nowrap"
             color="success"
             text={validationSuccessMessage}
           />
         )}
         {validationMessage && (
           <DotStatus
-            containerClassName="text-sm text-rnt-temp-main-text whitespace-nowrap mt-2 pl-4"
+            containerClassName="text-sm text-rnt-temp-main-text mt-2 pl-4 break-words xl:whitespace-nowrap"
             color="warning"
             text={validationMessage}
           />

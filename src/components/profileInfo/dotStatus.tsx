@@ -17,7 +17,7 @@ function DotStatus({
   return (
     <div className={containerClassNameMerged}>
       <span className={dotClassName}></span>
-      <span className="whitespace-normal break-words">{text}</span>
+      <span>{text}</span>
     </div>
   );
 }
