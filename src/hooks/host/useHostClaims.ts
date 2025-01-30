@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useRentality } from "@/contexts/rentalityContext";
-import { IRentalityContract } from "@/model/blockchain/IRentalityContract";
+import { IRentalityContracts, useRentality } from "@/contexts/rentalityContext";
 import { formatPhoneNumber, getDateFromBlockchainTime, getDateFromBlockchainTimeWithTZ } from "@/utils/formInput";
 import { getIpfsURI } from "@/utils/ipfsUtils";
 import { dateRangeFormatShortMonthDateYear } from "@/utils/datetimeFormatters";
@@ -140,13 +139,13 @@ const useHostClaims = () => {
   }
 
   useEffect(() => {
-    const getClaims = async (rentalityContract: IRentalityContract) => {
+    const getClaims = async (rentalityContracts: IRentalityContracts) => {
       try {
-        if (rentalityContract == null) {
+        if (!rentalityContracts) {
           console.error("getClaims error: contract is null");
           return;
         }
-        const claimsView: ContractFullClaimInfo[] = await rentalityContract.getMyClaimsAs(true);
+        const claimsView: ContractFullClaimInfo[] = await rentalityContracts.gateway.getMyClaimsAs(true);
 
         const claimsData =
           claimsView.length === 0
@@ -182,7 +181,7 @@ const useHostClaims = () => {
                 })
               );
 
-        const hostTripsView: ContractTripDTO[] = (await rentalityContract.getTripsAs(true)).filter(
+        const hostTripsView: ContractTripDTO[] = (await rentalityContracts.gateway.getTripsAs(true)).filter(
           (i) => i.trip.status !== TripStatus.Pending && i.trip.status !== TripStatus.Rejected
         );
 
@@ -224,7 +223,7 @@ const useHostClaims = () => {
     setUpdateRequired(false);
     setIsLoading(true);
 
-    getClaims(rentalityContracts.gateway)
+    getClaims(rentalityContracts)
       .then((data) => {
         setClaims(data?.claimsData ?? []);
         setTripInfos(data?.hostTripsData ?? []);

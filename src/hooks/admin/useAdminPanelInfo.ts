@@ -164,9 +164,8 @@ const useAdminPanelInfo = () => {
 
       console.debug("contractCivicKYCInfo", JSON.stringify(contractCivicKYCInfo, bigIntReplacer, 2));
 
-      const transaction = await rentalityContracts.gateway.setCivicKYCInfo(address, contractCivicKYCInfo);
-      await transaction.wait();
-      return true;
+      const result = await rentalityContracts.gatewayProxy.setCivicKYCInfo(address, contractCivicKYCInfo);
+      return result.ok;
     } catch (e) {
       console.error("updateKycInfoForAddress error" + e);
       return false;
@@ -196,9 +195,8 @@ const useAdminPanelInfo = () => {
         email: "testemail@test.com",
       };
 
-      const transaction = await rentalityContracts.gateway.setCivicKYCInfo(address, contractCivicKYCInfo);
-      await transaction.wait();
-      return true;
+      const result = await rentalityContracts.gatewayProxy.setCivicKYCInfo(address, contractCivicKYCInfo);
+      return result.ok;
     } catch (e) {
       console.error("setDrivingLicenceForAddress error" + e);
       return false;
@@ -217,39 +215,37 @@ const useAdminPanelInfo = () => {
       return false;
     }
 
-    try {
-      setIsLoading(true);
+    setIsLoading(true);
 
-      const paymentsNeeded = await rentalityContracts.gateway.calculatePaymentsWithDelivery(
-        BigInt(carId),
-        BigInt(3),
-        ETH_DEFAULT_ADDRESS,
-        emptyContractLocationInfo,
-        emptyContractLocationInfo,
-        EMPTY_PROMOCODE
-      );
+    const paymentResult = await rentalityContracts.gatewayProxy.calculatePaymentsWithDelivery(
+      BigInt(carId),
+      BigInt(3),
+      ETH_DEFAULT_ADDRESS,
+      emptyContractLocationInfo,
+      emptyContractLocationInfo,
+      EMPTY_PROMOCODE
+    );
 
-      const tripRequest: ContractCreateTripRequestWithDelivery = {
-        carId: BigInt(carId),
-        startDateTime: getBlockchainTimeFromDate(moment().toDate()),
-        endDateTime: getBlockchainTimeFromDate(moment().add(3, "days").toDate()),
-        currencyType: ETH_DEFAULT_ADDRESS,
-        pickUpInfo: { locationInfo: emptyContractLocationInfo, signature: "0x" },
-        returnInfo: { locationInfo: emptyContractLocationInfo, signature: "0x" },
-      };
-
-      const transaction = await rentalityContracts.gateway.createTripRequestWithDelivery(tripRequest, EMPTY_PROMOCODE, {
-        value: BigInt(Math.ceil(Number(paymentsNeeded.totalPrice) * 0.991)),
-      });
-      await transaction.wait();
-
-      return true;
-    } catch (e) {
-      console.error("createTestTrip error" + e);
-      return false;
-    } finally {
+    if (!paymentResult.ok) {
       setIsLoading(false);
+      return false;
     }
+
+    const tripRequest: ContractCreateTripRequestWithDelivery = {
+      carId: BigInt(carId),
+      startDateTime: getBlockchainTimeFromDate(moment().toDate()),
+      endDateTime: getBlockchainTimeFromDate(moment().add(3, "days").toDate()),
+      currencyType: ETH_DEFAULT_ADDRESS,
+      pickUpInfo: { locationInfo: emptyContractLocationInfo, signature: "0x" },
+      returnInfo: { locationInfo: emptyContractLocationInfo, signature: "0x" },
+    };
+
+    const result = await rentalityContracts.gatewayProxy.createTripRequestWithDelivery(tripRequest, EMPTY_PROMOCODE, {
+      value: BigInt(Math.ceil(Number(paymentResult.value.totalPrice) * 0.991)),
+    });
+
+    setIsLoading(false);
+    return result.ok;
   }
 
   const isIniialized = useRef<boolean>(false);

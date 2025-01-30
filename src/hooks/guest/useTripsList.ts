@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { TripInfoShortDetails } from "@/model/TripInfo";
-import { IRentalityContract } from "@/model/blockchain/IRentalityContract";
-import { useRentality } from "@/contexts/rentalityContext";
+import { IRentalityContracts, useRentality } from "@/contexts/rentalityContext";
 import { ContractTripDTO } from "@/model/blockchain/schemas";
 import { validateContractTripDTO } from "@/model/blockchain/schemas_utils";
 import { mapTripDTOtoTripInfoShordDetails } from "@/model/utils/TripDTOtoTripInfo";
@@ -18,19 +17,19 @@ const useTripsList = (isHost: boolean) => {
   }, []);
 
   useEffect(() => {
-    const getTrips = async (rentalityContract: IRentalityContract) => {
+    const getTrips = async (rentalityContracts: IRentalityContracts) => {
       if (!updateRequired) return;
-      if (!rentalityContract) return;
+      if (!rentalityContracts) return;
 
       setUpdateRequired(false);
       setIsLoading(true);
 
       try {
-        if (rentalityContract == null) {
+        if (!rentalityContracts) {
           console.error("getTrips error: contract is null");
           return;
         }
-        const tripsView: ContractTripDTO[] = await rentalityContract.getTripsAs(isHost);
+        const tripsView: ContractTripDTO[] = await rentalityContracts.gateway.getTripsAs(isHost);
 
         console.log("tripsView", JSON.stringify(tripsView, bigIntReplacer, 2));
 
@@ -57,7 +56,7 @@ const useTripsList = (isHost: boolean) => {
     if (!updateRequired) return;
     if (!rentalityContracts) return;
 
-    getTrips(rentalityContracts.gateway);
+    getTrips(rentalityContracts);
   }, [updateRequired, rentalityContracts]);
 
   return { isLoading, trips, refetchData } as const;

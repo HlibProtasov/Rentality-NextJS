@@ -16,7 +16,6 @@ import { ContractResultWrapper } from "../types";
 export interface IRentalityAdminGateway extends ContractResultWrapper<IRentalityAdminGatewayContract> {}
 
 export interface IRentalityAdminGatewayContract extends IEthersContract {
-  address: string;
   owner(): Promise<string>;
   getCarServiceAddress(): Promise<string>;
   updateCarService(contractAddress: string): Promise<ContractTransactionResponse>;

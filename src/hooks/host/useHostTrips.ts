@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { TripInfo, AllowedChangeTripAction } from "@/model/TripInfo";
-import { IRentalityContract } from "@/model/blockchain/IRentalityContract";
-import { useRentality } from "@/contexts/rentalityContext";
+import { IRentalityContracts, useRentality } from "@/contexts/rentalityContext";
 import { ContractTrip, ContractTripDTO, TripStatus } from "@/model/blockchain/schemas";
 import { validateContractTripDTO } from "@/model/blockchain/schemas_utils";
 import { mapTripDTOtoTripInfo } from "@/model/utils/TripDTOtoTripInfo";
@@ -235,13 +234,13 @@ const useHostTrips = () => {
       return result;
     };
 
-    const getTrips = async (rentalityContract: IRentalityContract) => {
+    const getTrips = async (rentalityContracts: IRentalityContracts) => {
       try {
-        if (rentalityContract == null) {
+        if (!rentalityContracts) {
           console.error("getTrips error: contract is null");
           return;
         }
-        const tripsBookedView: ContractTripDTO[] = await rentalityContract.getTripsAs(true);
+        const tripsBookedView: ContractTripDTO[] = await rentalityContracts.gateway.getTripsAs(true);
 
         const tripsBookedData =
           tripsBookedView.length === 0
@@ -271,7 +270,7 @@ const useHostTrips = () => {
     setUpdateRequired(false);
     setIsLoadingTrips(true);
 
-    getTrips(rentalityContracts.gateway)
+    getTrips(rentalityContracts)
       .then((data) => {
         setTripsBooked(
           data

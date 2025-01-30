@@ -1,8 +1,7 @@
 import { Signer } from "ethers";
 import { useEffect, useState } from "react";
-import { IRentalityContract } from "@/model/blockchain/IRentalityContract";
 import { HostCarInfo, emptyHostCarInfo } from "@/model/HostCarInfo";
-import { useRentality } from "@/contexts/rentalityContext";
+import { IRentalityContracts, useRentality } from "@/contexts/rentalityContext";
 import { useEthereum } from "@/contexts/web3/ethereumContext";
 import { ContractCarDetails, ContractCarInfoWithInsurance } from "@/model/blockchain/schemas";
 import { mapContractCarToCarDetails } from "@/model/mappers/contractCarToCarDetails";
@@ -14,15 +13,15 @@ const useFetchCarInfo = (carId: number) => {
   const [hostCarInfo, setHostCarInfo] = useState<HostCarInfo>(emptyHostCarInfo);
 
   useEffect(() => {
-    const getCarInfo = async (rentalityContract: IRentalityContract, signer: Signer) => {
-      if (rentalityContract == null) {
+    const getCarInfo = async (rentalityContracts: IRentalityContracts, signer: Signer) => {
+      if (!rentalityContracts) {
         console.error("getCarInfo error: contract is null");
         return;
       }
 
       try {
-        const carInfo: ContractCarInfoWithInsurance = await rentalityContract.getCarInfoById(BigInt(carId));
-        const carInfoDetails: ContractCarDetails = await rentalityContract.getCarDetails(BigInt(carId));
+        const carInfo: ContractCarInfoWithInsurance = await rentalityContracts.gateway.getCarInfoById(BigInt(carId));
+        const carInfoDetails: ContractCarDetails = await rentalityContracts.gateway.getCarDetails(BigInt(carId));
 
         const signerAddress = await signer.getAddress();
         if (carInfoDetails.host !== signerAddress) {
@@ -44,7 +43,7 @@ const useFetchCarInfo = (carId: number) => {
     if (!ethereumInfo) return;
     if (!rentalityContracts) return;
 
-    getCarInfo(rentalityContracts.gateway, ethereumInfo.signer)
+    getCarInfo(rentalityContracts, ethereumInfo.signer)
       .then((data) => {
         setHostCarInfo(data ?? emptyHostCarInfo);
         setIsLoading(false);

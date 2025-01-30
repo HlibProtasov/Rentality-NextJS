@@ -23,34 +23,32 @@ function useCheckPromo() {
         return Err(new Error("Contract is not initialized"));
       }
 
-      try {
-        const notEmtpyTimeZoneId = !isEmpty(timeZoneId) ? timeZoneId : UTC_TIME_ZONE_ID;
-        const dateFrom = moment.tz(startDateTimeStringFormat, notEmtpyTimeZoneId).toDate();
-        const dateTo = moment.tz(endDateTimeStringFormat, notEmtpyTimeZoneId).toDate();
+      const notEmtpyTimeZoneId = !isEmpty(timeZoneId) ? timeZoneId : UTC_TIME_ZONE_ID;
+      const dateFrom = moment.tz(startDateTimeStringFormat, notEmtpyTimeZoneId).toDate();
+      const dateTo = moment.tz(endDateTimeStringFormat, notEmtpyTimeZoneId).toDate();
 
-        const startUnixTime = getBlockchainTimeFromDate(dateFrom);
-        const endUnixTime = getBlockchainTimeFromDate(dateTo);
+      const startUnixTime = getBlockchainTimeFromDate(dateFrom);
+      const endUnixTime = getBlockchainTimeFromDate(dateTo);
 
-        console.log(
-          "checkPromoDto call",
-          JSON.stringify({ code, notEmtpyTimeZoneId, dateFrom, startUnixTime, dateTo, endUnixTime }, bigIntReplacer, 2)
-        );
-        const checkPromoDto = await rentalityContracts.gateway.checkPromo(code, startUnixTime, endUnixTime);
-        validateContractCheckPromoDTO(checkPromoDto);
+      console.debug(
+        "checkPromoDto call",
+        JSON.stringify({ code, notEmtpyTimeZoneId, dateFrom, startUnixTime, dateTo, endUnixTime }, bigIntReplacer, 2)
+      );
+      const result = await rentalityContracts.gatewayProxy.checkPromo(code, startUnixTime, endUnixTime);
+      if (!result.ok) return result;
 
-        console.log("checkPromoDto", JSON.stringify(checkPromoDto, bigIntReplacer, 2));
+      validateContractCheckPromoDTO(result.value);
 
-        if (!checkPromoDto.isFound) {
-          return Err(new Error("Promo is not found"));
-        }
-        if (!checkPromoDto.isValid || !checkPromoDto.isDiscount) {
-          return Err(new Error("Promo is not valid"));
-        }
+      console.log("checkPromoDto", JSON.stringify(result.value, bigIntReplacer, 2));
 
-        return Ok({ value: Number(checkPromoDto.value) });
-      } catch (error) {
-        return Err(new Error("checkPromo erro: " + error));
+      if (!result.value.isFound) {
+        return Err(new Error("Promo is not found"));
       }
+      if (!result.value.isValid || !result.value.isDiscount) {
+        return Err(new Error("Promo is not valid"));
+      }
+
+      return Ok({ value: Number(result.value.value) });
     },
     [rentalityContracts]
   );

@@ -2,7 +2,6 @@ import { getEtherContractWithSigner } from "@/abis";
 import { getMilesIncludedPerDayText } from "@/model/HostCarInfo";
 import { FilterLimits, SearchCarInfoDTO } from "@/model/SearchCarsResult";
 import { emptyLocationInfo, formatLocationInfoUpToCity } from "@/model/LocationInfo";
-import { IRentalityContract } from "@/model/blockchain/IRentalityContract";
 import {
   ContractFilterInfoDTO,
   ContractLocationInfo,
@@ -22,6 +21,7 @@ import { SearchCarFilters, SearchCarRequest } from "@/model/SearchCarRequest";
 import { allSupportedBlockchainList } from "@/model/blockchain/blockchainList";
 import { getTimeZoneIdFromAddress } from "@/utils/timezone";
 import getProviderApiUrlFromEnv from "@/utils/api/providerApiUrl";
+import { IRentalityGatewayContract } from "@/features/blockchain/models/IRentalityGateway";
 
 export type PublicSearchCarsResponse =
   | {
@@ -142,7 +142,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   const provider = new JsonRpcProvider(providerApiUrl);
   const wallet = new Wallet(privateKey, provider);
 
-  const rentality = (await getEtherContractWithSigner("gateway", wallet)) as unknown as IRentalityContract;
+  const rentality = (await getEtherContractWithSigner("gateway", wallet)) as unknown as IRentalityGatewayContract;
 
   if (rentality === null) {
     res.status(500).json({ error: "rentality is null" });

@@ -8,11 +8,11 @@ import { env } from "@/utils/env";
 import moment from "moment";
 import { Err, Ok, Result } from "@/model/utils/result";
 import { getEtherContractWithSigner } from "@/abis";
-import { IRentalityContract } from "@/model/blockchain/IRentalityContract";
 import { JsonRpcProvider, Wallet } from "ethers";
 import { ContractCivicKYCInfo } from "@/model/blockchain/schemas";
 import { getBlockchainTimeFromDate } from "@/utils/formInput";
 import getProviderApiUrlFromEnv from "@/utils/api/providerApiUrl";
+import { IRentalityGatewayContract } from "@/features/blockchain/models/IRentalityGateway";
 
 export type RetrieveCivicDataRequest = {
   requestId: string;
@@ -371,7 +371,7 @@ async function resetUserKycCommission(
   const provider = new JsonRpcProvider(providerApiUrl);
   const wallet = new Wallet(privateKey, provider);
 
-  const rentality = (await getEtherContractWithSigner("gateway", wallet)) as unknown as IRentalityContract;
+  const rentality = (await getEtherContractWithSigner("gateway", wallet)) as unknown as IRentalityGatewayContract;
 
   if (rentality === null) {
     console.error("rentality is null");
@@ -409,7 +409,7 @@ async function saveKycInfo(
     email: verifiedInformation.email,
   };
 
-  const rentality = (await getEtherContractWithSigner("gateway", wallet)) as unknown as IRentalityContract;
+  const rentality = (await getEtherContractWithSigner("gateway", wallet)) as unknown as IRentalityGatewayContract;
 
   if (rentality === null) {
     console.error("rentality is null");

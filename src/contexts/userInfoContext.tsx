@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useRentality } from "./rentalityContext";
 import { getIpfsURI } from "@/utils/ipfsUtils";
 import { useEthereum } from "./web3/ethereumContext";
-import { ContractFullKYCInfoDTO, ContractKYCInfo } from "@/model/blockchain/schemas";
 import { tryGetEnsName } from "@/utils/ether";
 
 export type UserInfo = {
@@ -14,20 +13,7 @@ export type UserInfo = {
   drivingLicense: string;
 };
 
-export type UserInfoUpdate = {
-  updateUserInfo: (c: UserInfo) => void;
-};
-
 const UserInfoContext = createContext<UserInfo | undefined>(undefined);
-const UserInfoUpdateContext = createContext((value: UserInfo) => {});
-
-export function useUserInfo() {
-  return useContext(UserInfoContext);
-}
-
-export function useUserInfoUpdate() {
-  return useContext(UserInfoUpdateContext);
-}
 
 export const UserInfoProvider = ({ children }: { children?: React.ReactNode }) => {
   const [currentUserInfo, setCurrentUserInfo] = useState<UserInfo | undefined>(undefined);
@@ -36,35 +22,31 @@ export const UserInfoProvider = ({ children }: { children?: React.ReactNode }) =
 
   useEffect(() => {
     const loadUserInfo = async () => {
-      if (!rentalityContracts) {
-        return;
-      }
-      if (!ethereumInfo) {
-        return;
-      }
-      try {
-        const myKYCInfo: ContractFullKYCInfoDTO = await rentalityContracts.gateway.getMyFullKYCInfo();
+      if (!rentalityContracts) return;
+      if (!ethereumInfo) return;
 
-        if (myKYCInfo == null) return;
+      const result = await rentalityContracts.gatewayProxy.getMyFullKYCInfo();
+      if (!result.ok) return;
 
-        setCurrentUserInfo({
-          address: ethereumInfo.walletAddress,
-          ensName: await tryGetEnsName(ethereumInfo.provider, ethereumInfo.walletAddress),
-          firstName: myKYCInfo.kyc.name,
-          lastName: myKYCInfo.kyc.name,
-          profilePhotoUrl: getIpfsURI(myKYCInfo.kyc.profilePhoto),
-          drivingLicense: myKYCInfo.kyc.licenseNumber,
-        });
-      } catch (e) {
-        console.error("UserInfoProvider error:" + e);
-      }
+      setCurrentUserInfo({
+        address: ethereumInfo.walletAddress,
+        ensName: await tryGetEnsName(ethereumInfo.provider, ethereumInfo.walletAddress),
+        firstName: result.value.kyc.name,
+        lastName: result.value.kyc.name,
+        profilePhotoUrl: getIpfsURI(result.value.kyc.profilePhoto),
+        drivingLicense: result.value.kyc.licenseNumber,
+      });
     };
     loadUserInfo();
   }, [rentalityContracts, ethereumInfo]);
 
-  return (
-    <UserInfoContext.Provider value={currentUserInfo}>
-      <UserInfoUpdateContext.Provider value={setCurrentUserInfo}>{children}</UserInfoUpdateContext.Provider>
-    </UserInfoContext.Provider>
-  );
+  return <UserInfoContext.Provider value={currentUserInfo}>{children}</UserInfoContext.Provider>;
 };
+
+export function useUserInfo() {
+  const context = useContext(UserInfoContext);
+  // if (!context) {
+  //   throw new Error("useUserInfo must be used within a UserInfoProvider");
+  // }
+  return context;
+}

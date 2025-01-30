@@ -1,1 +1,3 @@
-export interface IEthersContract {}
+export interface IEthersContract {
+  address: string;
+}

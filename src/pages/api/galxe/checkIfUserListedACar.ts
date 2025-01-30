@@ -1,5 +1,5 @@
 import { getEtherContractWithSigner } from "@/abis";
-import { IRentalityContract } from "@/model/blockchain/IRentalityContract";
+import { IRentalityGatewayContract } from "@/features/blockchain/models/IRentalityGateway";
 import { ContractPublicHostCarDTO } from "@/model/blockchain/schemas";
 import { env } from "@/utils/env";
 import { isEmpty } from "@/utils/string";
@@ -63,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   try {
     const provider = new JsonRpcProvider(providerApiUrl);
     const wallet = new Wallet(privateKey, provider);
-    const rentality = (await getEtherContractWithSigner("gateway", wallet)) as unknown as IRentalityContract;
+    const rentality = (await getEtherContractWithSigner("gateway", wallet)) as unknown as IRentalityGatewayContract;
 
     const userListingsView: ContractPublicHostCarDTO[] = await rentality.getCarsOfHost(userAddress);
 

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { IRentalityContract } from "@/model/blockchain/IRentalityContract";
-import { useRentality } from "@/contexts/rentalityContext";
+import { IRentalityContracts, useRentality } from "@/contexts/rentalityContext";
 import { ContractTripDTO } from "@/model/blockchain/schemas";
 import { mapTripDTOtoTripInfo } from "@/model/utils/TripDTOtoTripInfo";
 import { TripInfo } from "@/model/TripInfo";
@@ -10,13 +9,13 @@ const useTripInfo = (tripId: bigint) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [tripInfo, setTripInfo] = useState<TripInfo | null>(null);
 
-  const getTrip = async (rentalityContract: IRentalityContract, tripId: bigint) => {
+  const getTrip = async (rentalityContracts: IRentalityContracts, tripId: bigint) => {
     try {
-      if (rentalityContract == null) {
+      if (!rentalityContracts) {
         console.error("getTrip error: contract is null");
         return;
       }
-      const tripDTO: ContractTripDTO = await rentalityContract.getTrip(tripId);
+      const tripDTO: ContractTripDTO = await rentalityContracts.gateway.getTrip(tripId);
 
       if (tripDTO === null) return;
 
@@ -31,7 +30,7 @@ const useTripInfo = (tripId: bigint) => {
   useEffect(() => {
     if (!rentalityContracts) return;
 
-    getTrip(rentalityContracts.gateway, tripId)
+    getTrip(rentalityContracts, tripId)
       .then((data) => {
         setTripInfo(data ?? null);
         setIsLoading(false);

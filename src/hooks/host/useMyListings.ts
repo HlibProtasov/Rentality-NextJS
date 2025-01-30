@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { BaseCarInfo } from "@/model/BaseCarInfo";
 import { getIpfsURI, getMetaDataFromIpfs, parseMetaData } from "@/utils/ipfsUtils";
-import { IRentalityContract } from "@/model/blockchain/IRentalityContract";
-import { useRentality } from "@/contexts/rentalityContext";
+import { IRentalityContracts, useRentality } from "@/contexts/rentalityContext";
 import { validateContractCarInfoDTO } from "@/model/blockchain/schemas_utils";
 import { ContractCarInfoDTO } from "@/model/blockchain/schemas";
 
@@ -11,13 +10,13 @@ const useMyListings = () => {
   const [isLoadingMyListings, setIsLoadingMyListings] = useState<boolean>(true);
   const [myListings, setMyListings] = useState<BaseCarInfo[]>([]);
 
-  const getMyListings = async (rentalityContract: IRentalityContract | null) => {
+  const getMyListings = async (rentalityContracts: IRentalityContracts) => {
     try {
-      if (rentalityContract == null) {
+      if (!rentalityContracts) {
         console.error("getMyListings error: contract is null");
         return;
       }
-      const myListingsView: ContractCarInfoDTO[] = await rentalityContract.getMyCars();
+      const myListingsView: ContractCarInfoDTO[] = await rentalityContracts.gateway.getMyCars();
 
       const myListingsData =
         myListingsView.length === 0
@@ -60,7 +59,7 @@ const useMyListings = () => {
   useEffect(() => {
     if (!rentalityContracts) return;
 
-    getMyListings(rentalityContracts.gateway)
+    getMyListings(rentalityContracts)
       .then((data) => {
         setMyListings(data ?? []);
         setIsLoadingMyListings(false);

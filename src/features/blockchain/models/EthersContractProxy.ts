@@ -3,17 +3,6 @@ import { ContractTransactionResponse } from "ethers";
 import { Err, Ok } from "@/model/utils/result";
 import { IEthersContract } from "./IEtherContract";
 
-function isContractTransactionResponse(obj: any): obj is ContractTransactionResponse {
-  return (
-    obj &&
-    typeof obj === "object" &&
-    "provider" in obj &&
-    "chainId" in obj &&
-    "wait" in obj &&
-    typeof obj.wait === "function"
-  );
-}
-
 export function getEthersContractProxy<T extends IEthersContract>(contract: T): ContractResultWrapper<T> {
   return new Proxy(contract, {
     get(target, key, receiver) {
@@ -43,4 +32,15 @@ export function getEthersContractProxy<T extends IEthersContract>(contract: T): 
       };
     },
   }) as ContractResultWrapper<T>;
+}
+
+function isContractTransactionResponse(obj: any): obj is ContractTransactionResponse {
+  return (
+    obj &&
+    typeof obj === "object" &&
+    "provider" in obj &&
+    "chainId" in obj &&
+    "wait" in obj &&
+    typeof obj.wait === "function"
+  );
 }
