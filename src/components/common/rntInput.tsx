@@ -51,7 +51,7 @@ const RntInput = forwardRef<HTMLInputElement, RntInputProps>(
     const cClassName = cn("relative text-black flex flex-col w-full", className);
     const lClassName = cn("text-rnt-temp-main-text mb-1", labelClassName);
     const iClassName = cn(
-      "w-full h-12 border-2 rounded-full pl-4 disabled:bg-gray-300 disabled:text-gray-600",
+      "w-full h-12 border-2 rounded-full pl-4 disabled:bg-gray-300 disabled:text-gray-600 mr-[-32px]",
       inputClassName
     );
 

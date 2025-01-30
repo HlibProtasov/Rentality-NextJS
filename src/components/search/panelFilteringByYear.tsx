@@ -102,7 +102,7 @@ export default function PanelFilteringByYear({
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       setPositionDropdown({
-        top: rect.bottom + window.scrollY,
+        top: rect.bottom + window.scrollY + 8,
         left: rect.left + window.scrollX,
       });
     }
