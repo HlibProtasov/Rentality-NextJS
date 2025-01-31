@@ -22,6 +22,7 @@ import { allSupportedBlockchainList } from "@/model/blockchain/blockchainList";
 import { getTimeZoneIdFromAddress } from "@/utils/timezone";
 import getProviderApiUrlFromEnv from "@/utils/api/providerApiUrl";
 import { IRentalityGatewayContract } from "@/features/blockchain/models/IRentalityGateway";
+import { updateDate } from "@/utils/updateDate";
 
 export type PublicSearchCarsResponse =
   | {
@@ -233,7 +234,9 @@ function formatSearchAvailableCarsContractRequest(
   timeZoneId: string
 ) {
   const startCarLocalDateTime = moment.tz(searchCarRequest.dateFromInDateTimeStringFormat, timeZoneId).toDate();
-  const endCarLocalDateTime = moment.tz(searchCarRequest.dateToInDateTimeStringFormat, timeZoneId).toDate();
+  let endCarLocalDateTime = moment.tz(searchCarRequest.dateToInDateTimeStringFormat, timeZoneId).toDate();
+
+  endCarLocalDateTime = updateDate(startCarLocalDateTime, endCarLocalDateTime)
   const contractDateFromUTC = getBlockchainTimeFromDate(startCarLocalDateTime);
   const contractDateToUTC = getBlockchainTimeFromDate(endCarLocalDateTime);
   const contractSearchCarParams: ContractSearchCarParams = {

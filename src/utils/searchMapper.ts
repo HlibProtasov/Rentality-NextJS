@@ -3,6 +3,7 @@ import moment from "moment";
 import { getBlockchainTimeFromDate } from "./formInput";
 import { ContractSearchCarParams } from "@/model/blockchain/schemas";
 import { emptyContractLocationInfo } from "@/model/blockchain/schemas_utils";
+import { updateDate } from "./updateDate";
 
 export function formatSearchAvailableCarsContractRequest(
   searchCarRequest: SearchCarRequest,
@@ -10,7 +11,10 @@ export function formatSearchAvailableCarsContractRequest(
   timeZoneId: string
 ) {
   const startCarLocalDateTime = moment.tz(searchCarRequest.dateFromInDateTimeStringFormat, timeZoneId).toDate();
-  const endCarLocalDateTime = moment.tz(searchCarRequest.dateToInDateTimeStringFormat, timeZoneId).toDate();
+  let endCarLocalDateTime = moment.tz(searchCarRequest.dateToInDateTimeStringFormat, timeZoneId).toDate();
+  
+  
+  endCarLocalDateTime = updateDate(startCarLocalDateTime, endCarLocalDateTime)
   const contractDateFromUTC = getBlockchainTimeFromDate(startCarLocalDateTime);
   const contractDateToUTC = getBlockchainTimeFromDate(endCarLocalDateTime);
   const contractSearchCarParams: ContractSearchCarParams = {
